@@ -15,7 +15,7 @@ const Navbar = () => {
                 </a>
                 <a href="/" className="text-2xl">ExpenseEase</a>
             </div>
-            <ul className={"flex list-none sm:ms-auto gap-4 sm:self-center" + (isMobileMenuOpen ? "" : " hidden")}>
+            <ul className={"flex list-none sm:ms-auto gap-4 sm:self-center" + (isMobileMenuOpen ? "" : " hidden sm:flex")}>
                 <li><a href="#">Sign In</a></li>
             </ul>
         </nav>
