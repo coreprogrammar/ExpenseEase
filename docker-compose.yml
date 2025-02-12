@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./server
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./server:/app
+    env_file:
+      - .env
+    depends_on:
+      - mongo
+    command: ["node", "server.js"]
+
+  mongo:
+    image: mongo:latest
+    restart: always
+    ports:
+      - "27017:27017"
+    
+
+  frontend:
+    build: ./ui-server
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./ui-server:/app
+    command: ["sh", "-c", "rm -rf node_modules package-lock.json && npm install && npm run dev"]
