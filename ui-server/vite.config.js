@@ -8,4 +8,9 @@ export default defineConfig({
       react(),
       tailwindcss()
   ],
+  server: {
+    host: '0.0.0.0', // Allows external access from Docker
+    port: 5173,      // Ensures it's using the correct port
+    strictPort: true // Ensures it fails if the port is unavailable
+  }
 })
