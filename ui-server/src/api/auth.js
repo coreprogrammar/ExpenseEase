@@ -1,6 +1,6 @@
 export default class AuthApi {
 
-  static apiUrl = 'http://localhost:5000/api';
+  static apiUrl = import.meta.env.VITE_API_URL;
 
   static async register(data) {
     return await fetch(`${this.apiUrl}/auth/register`, {
