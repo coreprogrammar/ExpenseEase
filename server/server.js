@@ -1,8 +1,11 @@
 // server.js
-require("dotenv").config(); // Load .env variables
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
+
+require('dotenv').config(); // Allows usage of .env variables
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const { authController } = require("./controllers");
+
 
 const app = express();
 
@@ -19,6 +22,9 @@ mongoose
     console.error("❌ MongoDB connection error:", err);
     process.exit(1); // Exit if DB connection fails
   });
+
+// Routes
+app.use('/api/auth', authController);
 
 // Simple Test Route
 app.get("/", (req, res) => {
