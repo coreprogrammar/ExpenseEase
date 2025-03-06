@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt"); 
 
 class AuthController {
   async register(req, res) {
@@ -37,8 +38,14 @@ class AuthController {
     try {
       const { email, password } = req.body;
 
+      if (!email || !password) {
+        return res.status(400).json({ success: false, message: "All fields are required" });
+      }
+
       const user = await User.findOne({ email });
-      if (!user) return res.status(400).json({ success: false, message: "Invalid credentials" });
+      if (!user) {
+        return res.status(400).json({ success: false, message: "Invalid credentials" });
+      }
 
       // ✅ Compare the password with `passwordHash`
       const isMatch = await bcrypt.compare(password, user.passwordHash);

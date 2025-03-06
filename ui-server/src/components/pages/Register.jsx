@@ -116,6 +116,9 @@ export default function Register() {
               up
             </button>
           </div>
+          <p className="mt-4 text-sm text-gray-600 text-center">
+          Already have an account? <a href="/login" className="text-indigo-600 font-medium">Login</a>
+        </p>
         </form>
 
       </div>
