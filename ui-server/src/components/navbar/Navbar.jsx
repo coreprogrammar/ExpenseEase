@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom"; // Import Link from React Router
 import "./Navbar.module.css";
 import { Bars3Icon } from "@heroicons/react/16/solid";
 
@@ -14,10 +15,11 @@ const Navbar = () => {
 
           {/* Desktop Menu */}
           <ul className="hidden md:flex space-x-6">
-            <li><a href="#" className="nav-link">Home</a></li>
-            <li><a href="#" className="nav-link">About</a></li>
-            <li><a href="#" className="nav-link">Services</a></li>
-            <li><a href="#" className="nav-link">Contact</a></li>
+            <li><Link to="/" className="nav-link">Home</Link></li>
+            <li><Link to="/about" className="nav-link">About</Link></li>
+            <li><Link to="/services" className="nav-link">Services</Link></li>
+            <li><Link to="/dashboard" className="nav-link">Dashboard</Link></li>
+            <li><Link to="/contact" className="nav-link">Contact</Link></li>
           </ul>
 
           {/* Mobile Menu Button */}
@@ -31,10 +33,11 @@ const Navbar = () => {
       {menuOpen && (
         <div className="md:hidden bg-white shadow-md absolute top-16 left-0 w-full py-4">
           <ul className="flex flex-col items-center space-y-4">
-            <li><a href="#" className="nav-link" onClick={() => setMenuOpen(false)}>Home</a></li>
-            <li><a href="#" className="nav-link" onClick={() => setMenuOpen(false)}>About</a></li>
-            <li><a href="#" className="nav-link" onClick={() => setMenuOpen(false)}>Services</a></li>
-            <li><a href="#" className="nav-link" onClick={() => setMenuOpen(false)}>Contact</a></li>
+            <li><Link to="/" className="nav-link" onClick={() => setMenuOpen(false)}>Home</Link></li>
+            <li><Link to="/about" className="nav-link" onClick={() => setMenuOpen(false)}>About</Link></li>
+            <li><Link to="/services" className="nav-link" onClick={() => setMenuOpen(false)}>Services</Link></li>
+            <li><Link to="/dashboard" className="nav-link" onClick={() => setMenuOpen(false)}>Dashboard</Link></li>
+            <li><Link to="/contact" className="nav-link" onClick={() => setMenuOpen(false)}>Contact</Link></li>
           </ul>
         </div>
       )}
