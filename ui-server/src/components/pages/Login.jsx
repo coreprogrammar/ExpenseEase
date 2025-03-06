@@ -16,8 +16,8 @@ const Login = () => {
       const response = await AuthApi.login({ email, password });
       if (response.success && response.token) {
         localStorage.setItem("token", response.token);
-        window.dispatchEvent(new Event("storage")); // ✅ Manually trigger storage event
-        navigate("/dashboard"); // Redirect to dashboard
+        window.dispatchEvent(new Event("storage")); // ✅ Trigger global update
+        navigate("/dashboard");
       } else {
         setError(response.message || "Login failed");
       }

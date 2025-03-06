@@ -8,10 +8,10 @@ const Navbar = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem("token"));
   const navigate = useNavigate();
 
-  // ✅ Listen for authentication changes in localStorage
+  // ✅ Listen for authentication changes dynamically
   useEffect(() => {
     const handleAuthChange = () => {
-      setIsAuthenticated(!!localStorage.getItem("token"));
+      setIsAuthenticated(!!localStorage.getItem("token")); // ✅ Update state immediately
     };
 
     window.addEventListener("storage", handleAuthChange);
@@ -22,10 +22,10 @@ const Navbar = () => {
 
   // ✅ Logout function
   const handleLogout = () => {
-    localStorage.removeItem("token"); // Remove token
-    setIsAuthenticated(false); // Update state
-    window.dispatchEvent(new Event("storage")); // Trigger event to update navbar state
-    navigate("/login"); // Redirect to login page
+    localStorage.removeItem("token"); // ✅ Remove token
+    setIsAuthenticated(false); // ✅ Update state immediately
+    window.dispatchEvent(new Event("storage")); // ✅ Notify all components of logout
+    navigate("/login"); // ✅ Redirect to login page
   };
 
   return (
@@ -44,13 +44,16 @@ const Navbar = () => {
             <li><Link to="/contact" className="nav-link">Contact</Link></li>
 
             {isAuthenticated ? (
-              <li>
-                <button onClick={handleLogout} className="nav-link text-red-600 font-semibold">
-                  Logout
-                </button>
-              </li>
-            ) : (
-              <>
+                  <>
+                    <li><Link to="/profile" className="nav-link">Profile</Link></li>
+                    <li>
+                      <button onClick={handleLogout} className="nav-link text-red-600 font-semibold">
+                        Logout
+                      </button>
+                    </li>
+                  </>
+                ) : (
+                  <>
                 <li><Link to="/sign-up" className="nav-link">Sign Up</Link></li>
                 <li><Link to="/login" className="nav-link">Login</Link></li>
               </>
@@ -75,13 +78,16 @@ const Navbar = () => {
             <li><Link to="/contact" className="nav-link" onClick={() => setMenuOpen(false)}>Contact</Link></li>
 
             {isAuthenticated ? (
-              <li>
-                <button onClick={handleLogout} className="nav-link text-red-600 font-semibold">
-                  Logout
-                </button>
-              </li>
-            ) : (
-              <>
+                  <>
+                    <li><Link to="/profile" className="nav-link">Profile</Link></li>
+                    <li>
+                      <button onClick={handleLogout} className="nav-link text-red-600 font-semibold">
+                        Logout
+                      </button>
+                    </li>
+                  </>
+                ) : (
+                  <>
                 <li><Link to="/sign-up" className="nav-link" onClick={() => setMenuOpen(false)}>Sign Up</Link></li>
                 <li><Link to="/login" className="nav-link" onClick={() => setMenuOpen(false)}>Login</Link></li>
               </>
