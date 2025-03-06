@@ -22,4 +22,25 @@ export default class AuthApi {
       throw error;
     }
   }
+
+  // ✅ Login User with JWT
+  static async login(data) {
+    try {
+      const response = await fetch(`${this.apiUrl}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("❌ Login Failed:", error);
+      throw error;
+    }
+  }
 }
