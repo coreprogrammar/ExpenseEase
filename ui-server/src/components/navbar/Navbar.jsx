@@ -20,6 +20,7 @@ const Navbar = () => {
             <li><Link to="/services" className="nav-link">Services</Link></li>
             <li><Link to="/dashboard" className="nav-link">Dashboard</Link></li>
             <li><Link to="/contact" className="nav-link">Contact</Link></li>
+            <li><Link to="/sign-up" className="nav-link">Sign Up</Link></li>
           </ul>
 
           {/* Mobile Menu Button */}

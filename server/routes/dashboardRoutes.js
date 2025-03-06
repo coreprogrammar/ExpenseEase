@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const { getDashboardData } = require("../controllers/dashboardController");
-const auth = require("../middleware/auth"); // Middleware for authentication
+const { dashboardController } = require("../controllers");
+const authMiddleware = require("../middleware/auth"); // ✅ Session-based authentication
 
-// GET /api/dashboard - Fetch user's financial summary
-router.get("/", auth, getDashboardData);
+// ✅ GET /api/dashboard - Fetch user's financial summary (Protected Route)
+router.get("/", authMiddleware, dashboardController.getDashboardData);
 
 module.exports = router;
