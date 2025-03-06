@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // ✅ Import Link
 import AuthApi from "../../api/auth"; // Import API calls
 
 const Login = () => {
@@ -57,17 +57,24 @@ const Login = () => {
               required
             />
           </div>
-
+          
+          {/* ✅ Forgot Password Link */}
+          <div className="text-right">
+            <Link to="/forgot-password" className="text-indigo-600 text-sm hover:underline">
+              Forgot Password?
+            </Link>
+          </div>
+          
           <button
             type="submit"
-            className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition duration-200"
+            className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition duration-200 mt-4"
           >
             Login
           </button>
         </form>
 
         <p className="mt-4 text-sm text-gray-600 text-center">
-          Don't have an account? <a href="/sign-up" className="text-indigo-600 font-medium">Sign Up</a>
+          Don't have an account? <Link to="/sign-up" className="text-indigo-600 font-medium">Sign Up</Link>
         </p>
       </div>
     </div>
