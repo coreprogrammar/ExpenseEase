@@ -1,12 +1,14 @@
-import './App.css'
+import './App.css';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/navbar/Navbar.jsx";
 import React from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import ExpenseEaseRoutes from "./components/Routes/ExpenseEaseRoutes.jsx";
 
-
 function App() {
   return (
+
+
   <React.StrictMode>
     <Router future={
       {
@@ -16,7 +18,7 @@ function App() {
     }
     >
       <Navbar/>
-      <div className="mt-16">
+      <div className="pt-16 p-6">
         <ExpenseEaseRoutes />
       </div>
     </Router>
@@ -24,4 +26,4 @@ function App() {
   )
 }
 
-export default App
+export default App;
