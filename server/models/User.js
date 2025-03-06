@@ -34,7 +34,11 @@ const UserSchema = new mongoose.Schema({
       value: true,
       message: 'Password is required'
     } },
-  passwordSalt: { type: String }
+  passwordSalt: { type: String },
+  profileImage: { 
+    type: String, 
+    default: ""  // Stores the image URL or path
+  },
 }, { timestamps: true });
 
 function encrypt(text) {

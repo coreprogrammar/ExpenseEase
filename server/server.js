@@ -1,5 +1,6 @@
 require("dotenv").config();
 const express = require("express");
+const path = require("path");
 const mongoose = require("mongoose");
 const cors = require("cors");
 
@@ -8,6 +9,8 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Connect to MongoDB
 mongoose
@@ -21,6 +24,8 @@ mongoose
 // ✅ Correctly Import Routes (Ensure these files exist)
 app.use("/api/auth", require("./routes/authRoutes"));        // ✅ Fixed
 app.use("/api/dashboard", require("./routes/dashboardRoutes"));
+app.use("/api/users", require("./routes/userRoutes"));
+
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {

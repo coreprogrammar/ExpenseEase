@@ -1,21 +1,19 @@
-const User = require("../models/User");
+const jwt = require("jsonwebtoken");
 
-module.exports = async (req, res, next) => {
+module.exports = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ success: false, message: "Access denied. No token provided." });
+  }
+
+  const token = authHeader.split(" ")[1]; // Extract token
+
   try {
-    // ✅ Check if user is authenticated via session
-    if (req.session && req.session.userId) {
-      const user = await User.findById(req.session.userId);
-
-      if (!user) {
-        return res.status(401).json({ success: false, error: "User not found" });
-      }
-
-      req.user = user; // Attach user object to request
-      return next();
-    }
-
-    return res.status(401).json({ success: false, error: "User is not authenticated" });
-  } catch (err) {
-    return res.status(500).json({ success: false, error: "Server error during authentication" });
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); // Verify token
+    req.user = decoded; // Attach user data to request
+    next();
+  } catch (error) {
+    return res.status(401).json({ success: false, message: "Invalid or expired token." });
   }
 };

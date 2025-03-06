@@ -4,7 +4,8 @@ import Home from "../pages/Home.jsx";
 import Register from "../pages/Register.jsx";
 import Login from "../pages/Login.jsx";
 import Dashboard from "../pages/Dashboard.jsx";
-import ProtectedRoute from "./ProtectedRoutes.jsx";  
+import Profile from "../pages/Profile.jsx";
+import ProtectedRoute from "./ProtectedRoutes.jsx";
 
 export default function ExpenseEaseRoutes() {
   return (
@@ -13,9 +14,10 @@ export default function ExpenseEaseRoutes() {
       <Route path={routes.signup} element={<Register />} />
       <Route path={routes.login} element={<Login />} />
 
-      {/* ✅ Protect Dashboard Route */}
+      {/* ✅ Protected Routes */}
       <Route element={<ProtectedRoute />}>
         <Route path={routes.dashboard} element={<Dashboard />} />
+        <Route path={routes.profile} element={<Profile />} />
       </Route>
     </Routes>
   );
