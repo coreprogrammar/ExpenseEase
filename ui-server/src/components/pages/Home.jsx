@@ -1,176 +1,113 @@
-import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
-import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { CloudArrowUpIcon, LockClosedIcon, ServerIcon } from '@heroicons/react/20/solid';
+import React from 'react';
+import { Link } from 'react-router-dom';
 
-const user = {
-  name: 'Tom Cook',
-  email: 'tom@example.com',
-  imageUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-};
-
-const navigation = [
-  { name: 'Dashboard', href: '#', current: true },
-  { name: 'Team', href: '#', current: false },
-  { name: 'Projects', href: '#', current: false },
-  { name: 'Calendar', href: '#', current: false },
-  { name: 'Reports', href: '#', current: false },
-];
-
-const userNavigation = [
-  { name: 'Your Profile', href: '#' },
-  { name: 'Settings', href: '#' },
-  { name: 'Sign out', href: '#' },
-];
-
-const features = [
-  {
-    name: 'Push to deploy.',
-    description: 'Lorem ipsum, dolor sit amet consectetur adipisicing elit.',
-    icon: CloudArrowUpIcon,
-  },
-  {
-    name: 'SSL certificates.',
-    description: 'Anim aute id magna aliqua ad ad non deserunt sunt.',
-    icon: LockClosedIcon,
-  },
-  {
-    name: 'Database backups.',
-    description: 'Ac tincidunt sapien vehicula erat auctor pellentesque rhoncus.',
-    icon: ServerIcon,
-  },
-];
-
-const stats = [
-    { id: 1, name: 'Transactions every 24 hours', value: '44 million' },
-    { id: 2, name: 'Assets under holding', value: '$119 trillion' },
-    { id: 3, name: 'New users annually', value: '46,000' },
-  ];
-
-function classNames(...classes) {
-  return classes.filter(Boolean).join(' ');
-}
-
-export default function Home() {
+function Home() {
   return (
-    <div className="min-h-full">
-      <Disclosure as="nav" className="bg-gray-800">
-        {({ open }) => (
-          <>
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-              <div className="flex h-16 items-center justify-between">
-                <div className="flex items-center">
-                  <div className="shrink-0">
-                    <img
-                      src="https://tailwindui.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500"
-                      alt="Your Company"
-                      className="h-8 w-8"
-                    />
-                  </div>
-                  <div className="hidden md:block">
-                    <div className="ml-10 flex items-baseline space-x-4">
-                      {navigation.map((item) => (
-                        <a
-                          key={item.name}
-                          href={item.href}
-                          className={classNames(
-                            item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                            'rounded-md px-3 py-2 text-sm font-medium'
-                          )}
-                          aria-current={item.current ? 'page' : undefined}
-                        >
-                          {item.name}
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <div className="hidden md:block">
-                  <div className="ml-4 flex items-center md:ml-6">
-                    <button
-                      type="button"
-                      className="rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
-                    >
-                      <BellIcon className="h-6 w-6" aria-hidden="true" />
-                    </button>
+    <div className="relative min-h-screen">
+      {/* Full-page Money Background */}
+      <div className="absolute inset-0 -z-10">
+        <svg
+          viewBox="0 0 800 600"
+          className="w-full h-full"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <pattern id="moneyPattern" patternUnits="userSpaceOnUse" width="100" height="100">
+              <text
+                x="0"
+                y="50"
+                fontFamily="sans-serif"
+                fontSize="40"
+                fill="rgba(255,255,255,0.1)"
+              >
+                $
+              </text>
+            </pattern>
+          </defs>
+          <rect width="800" height="600" fill="url(#moneyPattern)" />
+        </svg>
+      </div>
 
-                    {/* Profile dropdown */}
-                    <Menu as="div" className="relative ml-3">
-                      <div>
-                        <MenuButton className="flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
-                          <img className="h-8 w-8 rounded-full" src={user.imageUrl} alt="" />
-                        </MenuButton>
-                      </div>
-                      <MenuItems className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none">
-                        {userNavigation.map((item) => (
-                          <MenuItem key={item.name} as="a" href={item.href} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                            {item.name}
-                          </MenuItem>
-                        ))}
-                      </MenuItems>
-                    </Menu>
-                  </div>
-                </div>
-                <div className="-mr-2 flex md:hidden">
-                  <DisclosureButton className="inline-flex items-center justify-center rounded-md bg-gray-800 p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none">
-                    {open ? <XMarkIcon className="h-6 w-6" /> : <Bars3Icon className="h-6 w-6" />}
-                  </DisclosureButton>
-                </div>
-              </div>
-            </div>
-
-            <DisclosurePanel className="md:hidden">
-              <div className="space-y-1 px-2 pt-2 pb-3 sm:px-3">
-                {navigation.map((item) => (
-                  <DisclosureButton key={item.name} as="a" href={item.href} className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
-                    {item.name}
-                  </DisclosureButton>
-                ))}
-              </div>
-            </DisclosurePanel>
-          </>
-        )}
-      </Disclosure>
-
-      <main>
-        <div className="bg-white py-24 sm:py-32">
-          <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="lg:grid lg:grid-cols-2 lg:gap-8">
-              <div className="lg:pr-8">
-                <h2 className="text-indigo-600 text-sm font-semibold">Deploy faster</h2>
-                <p className="mt-2 text-4xl font-bold text-gray-900">A better workflow</p>
-                <p className="mt-6 text-lg text-gray-600">Streamline your deployment with automated solutions.</p>
-                <dl className="mt-10 space-y-8">
-                  {features.map((feature) => (
-                    <div key={feature.name} className="relative pl-9">
-                      <feature.icon className="absolute top-1 left-1 h-5 w-5 text-indigo-600" />
-                      <dt className="font-semibold text-gray-900">{feature.name}</dt>
-                      <dd className="text-gray-600">{feature.description}</dd>
-                    </div>
-                  ))}
-                </dl>
-              </div>
-              <img src="https://tailwindui.com/plus-assets/img/component-images/dark-project-app-screenshot.png" alt="Product screenshot" className="w-full rounded-xl shadow-xl ring-1 ring-gray-300" />
+      {/* Main Content */}
+      <div className="relative z-10 flex flex-col">
+        {/* Hero Section */}
+        <section className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-20 px-6">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-5xl font-bold mb-6">ExpenseEase</h1>
+            <p className="text-xl mb-8">
+              Simplify your finances—track your expenses, manage budgets, and get actionable insights, all in one place.
+            </p>
+            <div className="flex justify-center space-x-4">
+              <Link
+                to="/sign-up"
+                className="px-6 py-3 bg-white text-indigo-600 font-semibold rounded hover:bg-gray-100"
+              >
+                Sign Up
+              </Link>
+              <Link
+                to="/login"
+                className="px-6 py-3 border border-white text-white font-semibold rounded hover:bg-white hover:text-indigo-600"
+              >
+                Login
+              </Link>
             </div>
           </div>
-        </div>
-      </main>
+        </section>
 
-      <div className="bg-white py-24 sm:py-32">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <dl className="grid grid-cols-1 gap-x-8 gap-y-16 text-center lg:grid-cols-3">
-          {stats.map((stat) => (
-            <div key={stat.id} className="mx-auto flex max-w-xs flex-col gap-y-4">
-              <dt className="text-base/7 text-gray-600">{stat.name}</dt>
-              <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-                {stat.value}
-              </dd>
+        {/* Features Section */}
+        <section className="py-16 px-6 bg-white">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">Why Choose ExpenseEase?</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="p-6 border rounded-lg shadow hover:shadow-lg transition duration-300">
+                <h3 className="text-xl font-semibold text-indigo-600 mb-2">Intuitive Dashboard</h3>
+                <p className="text-gray-600">
+                  View interactive charts and insights that give you a clear picture of your spending and budget performance.
+                </p>
+              </div>
+              <div className="p-6 border rounded-lg shadow hover:shadow-lg transition duration-300">
+                <h3 className="text-xl font-semibold text-indigo-600 mb-2">Automated Expense Tracking</h3>
+                <p className="text-gray-600">
+                  Upload your bank statements and let our smart parser extract your transactions automatically.
+                </p>
+              </div>
+              <div className="p-6 border rounded-lg shadow hover:shadow-lg transition duration-300">
+                <h3 className="text-xl font-semibold text-indigo-600 mb-2">Actionable Alerts & Reports</h3>
+                <p className="text-gray-600">
+                  Receive suggestions when you’re nearing your budget limits and generate detailed reports to stay on top of your finances.
+                </p>
+              </div>
             </div>
-          ))}
-        </dl>
+          </div>
+        </section>
+
+        {/* Call-to-Action Section */}
+        <section className="bg-indigo-600 text-white py-16 px-6">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-4xl font-bold mb-6">Ready to take control of your finances?</h2>
+            <p className="text-xl mb-8">
+              Join ExpenseEase today and start managing your expenses smarter.
+            </p>
+            <div className="flex justify-center">
+              <Link
+                to="/sign-up"
+                className="px-8 py-4 bg-white text-indigo-600 font-semibold rounded hover:bg-gray-100"
+              >
+                Get Started
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Footer */}
+        <footer className="bg-gray-800 text-gray-300 py-6 px-6">
+          <div className="max-w-6xl mx-auto text-center">
+            <p>&copy; {new Date().getFullYear()} ExpenseEase. All rights reserved.</p>
+          </div>
+        </footer>
       </div>
     </div>
-    </div>
-
-    
   );
 }
+
+export default Home;

@@ -6,5 +6,10 @@ const routes = {
   profile: "/profile",
   forgotPassword: "/forgot-password",
   resetPassword: "/reset-password/:token",
+  pdfUpload: "/upload-pdf",
+  categoryManage: "/categories",
+  transactions: "/transactions",
+  budget: "/budget",
+  report: "/reports"
 };
 export default routes;
