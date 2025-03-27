@@ -37,25 +37,77 @@ const Navbar = () => {
 
           {/* Desktop Menu */}
           <ul className="hidden md:flex space-x-6">
-            <li><Link to="/" className="nav-link">Home</Link></li>
-            <li><Link to="/about" className="nav-link">About</Link></li>
-            <li><Link to="/services" className="nav-link">Services</Link></li>
-            <li><Link to="/dashboard" className="nav-link">Dashboard</Link></li>
-            <li><Link to="/contact" className="nav-link">Contact</Link></li>
+            <li>
+              <Link to="/" className="nav-link">
+                Home
+              </Link>
+            </li>
+            <li>
+              <Link to="/about" className="nav-link">
+                About
+              </Link>
+            </li>
+            <li>
+              <Link to="/services" className="nav-link">
+                Services
+              </Link>
+            </li>
+            <li>
+              <Link to="/dashboard" className="nav-link">
+                Dashboard
+              </Link>
+            </li>
+            <li>
+              <Link to="/contact" className="nav-link">
+                Contact
+              </Link>
+            </li>
 
+            {/* Conditionally show links if logged in */}
             {isAuthenticated ? (
-                  <>
-                    <li><Link to="/profile" className="nav-link">Profile</Link></li>
-                    <li>
-                      <button onClick={handleLogout} className="nav-link text-red-600 font-semibold">
-                        Logout
-                      </button>
-                    </li>
-                  </>
-                ) : (
-                  <>
-                <li><Link to="/sign-up" className="nav-link">Sign Up</Link></li>
-                <li><Link to="/login" className="nav-link">Login</Link></li>
+              <>
+                <li>
+                  <Link to="/profile" className="nav-link">
+                    Profile
+                  </Link>
+                </li>
+                {/* Add "Upload PDF" link for authenticated users */}
+                <li>
+                  <Link to="/upload-pdf" className="nav-link">
+                    Upload PDF
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/categories" className="nav-link" onClick={() => setMenuOpen(false)}>
+                    Category Management
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/reports" className="nav-link" onClick={() => setMenuOpen(false)}>
+                    Reports
+                  </Link>
+                </li>
+                <li>
+                  <button
+                    onClick={handleLogout}
+                    className="nav-link text-red-600 font-semibold"
+                  >
+                    Logout
+                  </button>
+                </li>
+              </>
+            ) : (
+              <>
+                <li>
+                  <Link to="/sign-up" className="nav-link">
+                    Sign Up
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/login" className="nav-link">
+                    Login
+                  </Link>
+                </li>
               </>
             )}
           </ul>
@@ -71,25 +123,80 @@ const Navbar = () => {
       {menuOpen && (
         <div className="md:hidden bg-white shadow-md absolute top-16 left-0 w-full py-4">
           <ul className="flex flex-col items-center space-y-4">
-            <li><Link to="/" className="nav-link" onClick={() => setMenuOpen(false)}>Home</Link></li>
-            <li><Link to="/about" className="nav-link" onClick={() => setMenuOpen(false)}>About</Link></li>
-            <li><Link to="/services" className="nav-link" onClick={() => setMenuOpen(false)}>Services</Link></li>
-            <li><Link to="/dashboard" className="nav-link" onClick={() => setMenuOpen(false)}>Dashboard</Link></li>
-            <li><Link to="/contact" className="nav-link" onClick={() => setMenuOpen(false)}>Contact</Link></li>
+            <li>
+              <Link to="/" className="nav-link" onClick={() => setMenuOpen(false)}>
+                Home
+              </Link>
+            </li>
+            <li>
+              <Link to="/about" className="nav-link" onClick={() => setMenuOpen(false)}>
+                About
+              </Link>
+            </li>
+            <li>
+              <Link to="/services" className="nav-link" onClick={() => setMenuOpen(false)}>
+                Services
+              </Link>
+            </li>
+            
+            <li>
+              <Link to="/contact" className="nav-link" onClick={() => setMenuOpen(false)}>
+                Contact
+              </Link>
+            </li>
 
             {isAuthenticated ? (
-                  <>
-                    <li><Link to="/profile" className="nav-link">Profile</Link></li>
-                    <li>
-                      <button onClick={handleLogout} className="nav-link text-red-600 font-semibold">
-                        Logout
-                      </button>
-                    </li>
-                  </>
-                ) : (
-                  <>
-                <li><Link to="/sign-up" className="nav-link" onClick={() => setMenuOpen(false)}>Sign Up</Link></li>
-                <li><Link to="/login" className="nav-link" onClick={() => setMenuOpen(false)}>Login</Link></li>
+              <>
+                <li>
+                  <Link to="/profile" className="nav-link" onClick={() => setMenuOpen(false)}>
+                    Profile
+                  </Link>
+                </li>
+                {/* Add "Upload PDF" link here too */}
+                <li>
+                  <Link to="/upload-pdf" className="nav-link" onClick={() => setMenuOpen(false)}>
+                    Upload PDF
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/dashboard" className="nav-link" onClick={() => setMenuOpen(false)}>
+                    Dashboard
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/categories" className="nav-link" onClick={() => setMenuOpen(false)}>
+                    Category Management
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/reports" className="nav-link" onClick={() => setMenuOpen(false)}>
+                    Reports
+                  </Link>
+                </li>
+                <li>
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setMenuOpen(false);
+                    }}
+                    className="nav-link text-red-600 font-semibold"
+                  >
+                    Logout
+                  </button>
+                </li>
+              </>
+            ) : (
+              <>
+                <li>
+                  <Link to="/sign-up" className="nav-link" onClick={() => setMenuOpen(false)}>
+                    Sign Up
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/login" className="nav-link" onClick={() => setMenuOpen(false)}>
+                    Login
+                  </Link>
+                </li>
               </>
             )}
           </ul>

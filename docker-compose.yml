@@ -24,6 +24,8 @@ services:
     build: ./ui-server
     ports:
       - "5173:5173"
+    env_file:
+      - .env
     volumes:
       - ./ui-server:/app
     command: ["sh", "-c", "rm -rf node_modules package-lock.json && npm install && npm run dev"]
