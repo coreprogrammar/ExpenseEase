@@ -9,5 +9,6 @@
       { "handle": "filesystem" },
       { "src": "/(.*)", "dest": "ui-server/dist/index.html" }
     ]
+    
   }
   

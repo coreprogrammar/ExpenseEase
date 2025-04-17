@@ -1,9 +1,8 @@
 {
-  "name": "expenseease-monorepo",
+  "name": "expenseease",
   "private": true,
 
   "scripts": {
-
     "build": "npm --prefix ui-server run build"
   },
 
