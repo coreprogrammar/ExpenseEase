@@ -188,7 +188,7 @@ function TransactionPage() {
   return (
     <div className="min-h-screen flex bg-gray-100">
       {/* Sidebar */}
-      <aside className="w-64 bg-white shadow hidden md:flex flex-col">
+      <aside className="w-64 bg-white shadow-lg hidden md:flex flex-col">
         <div className="p-6 border-b">
           <h2 className="text-2xl font-bold text-indigo-600">ExpenseTracker</h2>
         </div>
@@ -197,7 +197,7 @@ function TransactionPage() {
             <li>
               <a
                 href="/dashboard"
-                className="block py-2 px-4 rounded hover:bg-gray-200"
+                className="block px-4 py-2 rounded hover:bg-gray-200 transition-colors duration-200"
               >
                 Dashboard
               </a>
@@ -205,7 +205,7 @@ function TransactionPage() {
             <li>
               <a
                 href="/transactions"
-                className="block py-2 px-4 rounded bg-indigo-100 font-bold"
+                className="block px-4 py-2 rounded bg-indigo-100 font-semibold text-indigo-800"
               >
                 Transactions
               </a>
@@ -213,14 +213,23 @@ function TransactionPage() {
             <li>
               <a
                 href="/budget"
-                className="block py-2 px-4 rounded hover:bg-gray-200"
+                className="block px-4 py-2 rounded hover:bg-gray-200 transition-colors duration-200"
               >
                 Budget
+              </a>
+            </li>
+            <li>
+              <a
+                href="/reports"
+                className="block px-4 py-2 rounded hover:bg-gray-200 transition-colors duration-200"
+              >
+                Reports
               </a>
             </li>
           </ul>
         </nav>
       </aside>
+
 
       {/* Main Content */}
       <main className="flex-1">

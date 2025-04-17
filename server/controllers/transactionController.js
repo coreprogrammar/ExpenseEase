@@ -1,5 +1,6 @@
 const Transaction = require('../models/Transaction');
 const mongoose = require('mongoose');
+const alertController = require('./alertController');
 
 // 1) GET all transactions for the current user
 exports.getAllTransactions = async (req, res) => {
@@ -20,21 +21,24 @@ exports.createTransaction = async (req, res) => {
     const userId = req.user.id;
     const { date, description, amount, category, status } = req.body;
 
-    // Basic validation
     if (!date || !amount) {
       return res.status(400).json({ error: 'Date and amount are required' });
     }
 
     const transaction = new Transaction({
       userId,
-      date: new Date(date), // or parse from string
+      date: new Date(date),
       description: description || '',
       amount,
       category: category || 'Uncategorized',
       status: status || 'pending'
     });
-    
+
     await transaction.save();
+
+    // ✅ Check for alerts after saving the transaction
+    await alertController.checkUserAlerts(userId);
+
     res.json(transaction);
   } catch (err) {
     console.error('Error creating transaction:', err);
@@ -49,7 +53,6 @@ exports.updateTransaction = async (req, res) => {
     const { id } = req.params;
     const { date, description, amount, category, status } = req.body;
 
-    // findOneAndUpdate ensures the user can only update their own doc
     const transaction = await Transaction.findOneAndUpdate(
       { _id: id, userId },
       {
@@ -66,12 +69,16 @@ exports.updateTransaction = async (req, res) => {
       return res.status(404).json({ error: 'Transaction not found or not yours' });
     }
 
+    // ✅ Recheck alerts after transaction update
+    await alertController.checkUserAlerts(userId);
+
     res.json(transaction);
   } catch (err) {
     console.error('Error updating transaction:', err);
     res.status(500).json({ error: 'Server error' });
   }
 };
+
 
 // 4) DELETE a transaction
 exports.deleteTransaction = async (req, res) => {
@@ -83,9 +90,13 @@ exports.deleteTransaction = async (req, res) => {
       _id: id,
       userId
     });
+
     if (!transaction) {
       return res.status(404).json({ error: 'Transaction not found or not yours' });
     }
+
+    // ✅ Recheck alerts after transaction deletion
+    await alertController.checkUserAlerts(userId);
 
     res.json({ message: 'Transaction deleted successfully' });
   } catch (err) {
@@ -93,6 +104,7 @@ exports.deleteTransaction = async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
+
 
 exports.getSummary = async (req, res) => {
     try {
@@ -143,7 +155,9 @@ exports.getSummary = async (req, res) => {
       const recentTransactions = await Transaction.find({ userId })
         .sort({ date: -1 })
         .limit(10);
-  
+        console.log("📊 Raw Monthly Overview:", monthlyOverview);
+console.log("📊 Formatted Monthly Overview:", formattedMonthly);
+
       res.json({
         monthlyOverview: formattedMonthly,
         topCategories,

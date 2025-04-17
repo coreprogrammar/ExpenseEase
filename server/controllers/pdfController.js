@@ -1,6 +1,7 @@
 const pdfParse = require('pdf-parse');
 const Transaction = require('../models/Transaction');
 const alertController = require('./alertController');
+const Budget = require('../models/Budget');
 
 const KNOWN_CATEGORIES = [
   'Transportation',
@@ -50,6 +51,7 @@ function rejoinLinesUntilAmount(rawLines) {
 function parseSimpliiStatement(pdfText) {
   const rawLines = pdfText.split('\n');
   const lines = rejoinLinesUntilAmount(rawLines);
+
   const lineRegex = /^([A-Z][a-z]{2}\s*\d{1,2})\s+([A-Z][a-z]{2}\s*\d{1,2})(.+?)(-?\d+\.\d{2})$/;
   const transactions = [];
 
@@ -78,9 +80,12 @@ function parseSimpliiStatement(pdfText) {
         description = lineTrim;
         category = 'Uncategorized';
       }
+
+     
+
       transactions.push({
-        transDate: transDate.trim(),   // e.g. "Dec 31"
-        postDate: postDate.trim(),       // e.g. "Jan 03"
+        transDate,
+      postDate,      // e.g. "Jan 03"
         description,
         category,
         amount,
@@ -135,6 +140,21 @@ exports.uploadPdf = async (req, res) => {
   }
 };
 
+const updateBudgetSpent = async (userId, txs) => {
+  for (const tx of txs) {
+    const budgets = await Budget.find({
+      userId,
+      categories: { $in: [tx.category] },
+      ...(tx.date && { startDate: { $lte: tx.date }, endDate: { $gte: tx.date } })
+    });
+
+    for (const budget of budgets) {
+      budget.spent = (budget.spent || 0) + tx.amount;
+      await budget.save();
+    }
+  }
+};
+
 exports.finalizeTransactions = async (req, res) => {
   try {
     const { transactions, statementStartDate, statementEndDate } = req.body;
@@ -151,28 +171,28 @@ exports.finalizeTransactions = async (req, res) => {
       startDateObj = new Date(statementStartDate);
       endDateObj = new Date(statementEndDate);
     }
-    // Month abbreviations array for parsing the transaction month
-    const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    // If a valid statement period is found, determine the start month and years
+
     const startMonthNum = startDateObj ? (startDateObj.getMonth() + 1) : 1;
-    const startYear = startDateObj ? startDateObj.getFullYear() : 2024;
-    const endYear = endDateObj ? endDateObj.getFullYear() : 2024;
+    const startYear = startDateObj ? startDateObj.getFullYear() : 2025;
+    const endYear = endDateObj ? endDateObj.getFullYear() : 2025;
+
+    console.log('📅 Statement Period:', startYear, 'to', endYear);
+
+    const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
     const docsToInsert = transactions.map((tx) => {
-      // Assume tx.transDate is like "Dec 31" (month abbrev and day)
-      const parts = tx.transDate.split(' ');
+      const parts = tx.transDate.trim().split(' ');
       const txMonthAbbrev = parts[0];
       const txMonthNum = monthNames.findIndex(m => m.toLowerCase() === txMonthAbbrev.toLowerCase()) + 1;
-      
-      // If statement spans two different years and the transaction month is less than the start month,
-      // assume the transaction belongs to the end year.
-      const finalYear = (startYear !== endYear && txMonthNum < startMonthNum)
-        ? endYear
-        : startYear;
+
+      // 👇 Force all transactions to use the startYear for now (2025)
+      const finalYear = startYear;
+      const fullDateString = `${finalYear} ${tx.transDate}`;
+      console.log('🧾 Transaction:', tx.transDate, '→ Full date:', fullDateString);
 
       return {
         userId,
-        date: new Date(`${finalYear} ${tx.transDate}`),
+        date: new Date(fullDateString),
         description: tx.description,
         amount: tx.amount,
         category: tx.category || 'Uncategorized',
@@ -181,15 +201,21 @@ exports.finalizeTransactions = async (req, res) => {
     });
 
     await Transaction.insertMany(docsToInsert);
-    // Check for spending alerts after inserting transactions
     await alertController.checkUserAlerts(userId);
+    await updateBudgetSpent(userId, docsToInsert);
 
     return res.json({
       message: 'Transactions finalized',
       insertedCount: docsToInsert.length,
     });
+
+    
   } catch (err) {
     console.error('Error finalizing transactions:', err);
     return res.status(500).json({ error: 'Could not finalize transactions' });
   }
+
+  
 };
+
+

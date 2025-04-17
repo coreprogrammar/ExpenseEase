@@ -145,3 +145,41 @@ exports.getBudgetsUsage = async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
+
+// Recalculate actual spent for all budgets based on current transactions
+exports.recalculateSpent = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const budgets = await Budget.find({ userId });
+
+    for (const budget of budgets) {
+      const matchQuery = { userId };
+
+      if (budget.categories.length > 0) {
+        matchQuery.category = { $in: budget.categories };
+      }
+      if (budget.startDate) {
+        matchQuery.date = { ...matchQuery.date, $gte: budget.startDate };
+      }
+      if (budget.endDate) {
+        matchQuery.date = { ...matchQuery.date, $lte: budget.endDate };
+      }
+
+      const agg = await Transaction.aggregate([
+        { $match: matchQuery },
+        { $group: { _id: null, total: { $sum: "$amount" } } }
+      ]);
+
+      const totalSpent = agg.length > 0 ? agg[0].total : 0;
+      budget.spent = totalSpent;
+      await budget.save();
+    }
+
+    res.json({ message: "Recalculated budget spending." });
+  } catch (err) {
+    console.error("Error recalculating spent:", err);
+    res.status(500).json({ error: "Could not recalculate spent." });
+  }
+};
+
+

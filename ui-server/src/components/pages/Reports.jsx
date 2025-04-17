@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';          // ✨
 import BarChart from './BarChart';
 import LineChart from './LineChart';
 import PieChart from './PieChart';
@@ -7,233 +8,174 @@ import AreaChart from './AreaChart';
 import ScatterPlot from './ScatterPlot';
 import StackedBarChart from './StackedBarChart';
 
+const fadeVariants = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } };
+
 function Reports() {
+  /* ---------------- state + filters  ---------------- */
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  
-  // Filter state for advanced filters
-  const [filters, setFilters] = useState({
-    startDate: '',
-    endDate: '',
-    category: ''
-  });
-  
-  // Report data state (expected from backend)
-  const [dailyTrends, setDailyTrends] = useState([]);
-  const [monthlyOverview, setMonthlyOverview] = useState([]);
-  const [categoryDistribution, setCategoryDistribution] = useState([]);
-  const [areaChartData, setAreaChartData] = useState([]);
-  const [scatterData, setScatterData] = useState([]);
-  const [stackedData, setStackedData] = useState([]);
-  const [stackKeys, setStackKeys] = useState([]);
+  const [filters, setFilters] = useState({ startDate: '', endDate: '', category: '' });
 
-  // Handle filter changes
-  const handleFilterChange = (e) => {
+  const [dailyTrends, setDailyTrends]             = useState([]);
+  const [monthlyOverview, setMonthlyOverview]     = useState([]);
+  const [categoryDistribution, setCategoryDist]   = useState([]);
+  const [areaChartData, setAreaChartData]         = useState([]);
+  const [scatterData, setScatterData]             = useState([]);
+  const [stackedData, setStackedData]             = useState([]);
+  const [stackKeys, setStackKeys]                 = useState([]);
+
+  const handleFilterChange = (e) =>
     setFilters({ ...filters, [e.target.name]: e.target.value });
-  };
 
-  // Fetch report data from backend
+  /* ---------------- fetch logic  ---------------- */
   const fetchReportData = async () => {
     setLoading(true);
     setErrorMessage('');
     try {
       const token = localStorage.getItem('token');
-      if (!token) {
-        setErrorMessage('Please log in to view reports.');
-        setLoading(false);
-        return;
-      }
-      // Build query string from filters
-      const params = new URLSearchParams();
-      if (filters.startDate) params.append('startDate', filters.startDate);
-      if (filters.endDate) params.append('endDate', filters.endDate);
-      if (filters.category) params.append('category', filters.category);
-
-      const res = await fetch(`http://localhost:5000/api/reports?${params.toString()}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+      if (!token) throw new Error('Please log in to view reports.');
+      const qs = new URLSearchParams(filters).toString();
+      const res = await fetch(`http://localhost:5000/api/reports?${qs}`, {
+        headers: { Authorization: `Bearer ${token}` }
       });
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.error || 'Error fetching report data');
-      }
+      if (!res.ok) throw new Error((await res.json()).error);
+
       const data = await res.json();
-      // Expected structure from backend:
-      // { dailyTrends, monthlyOverview, categoryDistribution, stackedData, stackKeys }
       setDailyTrends(data.dailyTrends || []);
       setMonthlyOverview(data.monthlyOverview || []);
-      setCategoryDistribution(data.categoryDistribution || []);
-      // For AreaChart, we use dailyTrends data
+      setCategoryDist(data.categoryDistribution || []);
       setAreaChartData(data.dailyTrends || []);
-      // For ScatterPlot, assume each data point has { date: 'YYYY-MM-DD', totalSpent }
       setScatterData(
-        (data.dailyTrends || []).map(item => ({
-          x: parseInt(item.date.split('-')[2], 10), // day of month
-          y: item.totalSpent
+        (data.dailyTrends || []).map(d => ({
+          x: parseInt(d.date.split('-')[2], 10),
+          y: d.totalSpent
         }))
       );
-      // StackedBarChart: if not provided, use dummy data as fallback
-      setStackedData(
-        data.stackedData || [
-          { date: '2024-02-01', Food: 100, Transport: 50, Entertainment: 20 },
-          { date: '2024-02-02', Food: 80, Transport: 60, Entertainment: 30 },
-          { date: '2024-02-03', Food: 120, Transport: 40, Entertainment: 25 }
-        ]
-      );
-      setStackKeys(data.stackKeys || ['Food', 'Transport', 'Entertainment']);
-      console.log('Report data:', data);
+      setStackedData(data.stackedData || []);
+      setStackKeys(data.stackKeys || []);
     } catch (err) {
-      console.error(err);
       setErrorMessage(err.message || 'Could not load report data');
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchReportData();
-  }, [filters]);
+  useEffect(() => { fetchReportData(); }, [filters]);
 
-  // Print/Export function
-  const handleExport = () => {
-    window.print();
-  };
+  /* ---------------- util ---------------- */
+  const card = (title, chart) => (
+    <motion.div
+      variants={fadeVariants}
+      initial="hidden"
+      animate="show"
+      transition={{ duration: .4 }}
+      className="bg-white rounded-lg shadow p-6 mb-8 transform transition hover:-translate-y-1 hover:shadow-xl"
+    >
+      <h2 className="text-xl font-semibold mb-4">{title}</h2>
+      {chart}
+    </motion.div>
+  );
 
+  /* ---------------- UI ---------------- */
   return (
     <div className="min-h-screen flex bg-gray-100">
-      {/* Sidebar */}
+      {/* ---------- Sidebar ---------- */}
       <aside className="w-64 bg-white shadow hidden md:flex flex-col">
         <div className="p-6 border-b">
           <h2 className="text-2xl font-bold text-indigo-600">ExpenseTracker</h2>
         </div>
         <nav className="flex-1 p-6">
           <ul className="space-y-4">
-            <li>
-              <Link to="/dashboard" className="block py-2 px-4 rounded hover:bg-gray-200">
-                Dashboard
-              </Link>
-            </li>
-            <li>
-              <Link to="/transactions" className="block py-2 px-4 rounded hover:bg-gray-200">
-                Transactions
-              </Link>
-            </li>
-            <li>
-              <Link to="/budget" className="block py-2 px-4 rounded hover:bg-gray-200">
-                Budget
-              </Link>
-            </li>
-            <li>
-              <Link to="/reports" className="block py-2 px-4 rounded bg-gray-100 font-bold">
-                Reports
-              </Link>
-            </li>
+            {['dashboard','transactions','budget','reports'].map(p => (
+              <li key={p}>
+                <Link
+                  to={`/${p}`}
+                  className={`block py-2 px-4 rounded ${
+                    p==='reports' ? 'bg-gray-100 font-bold' : 'hover:bg-gray-200'
+                  }`}>
+                  {p[0].toUpperCase()+p.slice(1)}
+                </Link>
+              </li>
+            ))}
           </ul>
         </nav>
       </aside>
 
-      {/* Main Content */}
+      {/* ---------- Main ---------- */}
       <main className="flex-1 p-6">
-        {/* Mobile Header */}
+        {/* Mobile header unchanged */}
         <header className="bg-white shadow p-4 md:hidden">
           <h2 className="text-2xl font-bold text-indigo-600">ExpenseTracker</h2>
         </header>
 
-        <div>
-          <h1 className="text-3xl font-bold text-indigo-700 mb-6">Reports</h1>
+        <h1 className="text-3xl font-bold text-indigo-700 mb-6">Reports</h1>
 
-          {/* Advanced Filters */}
-          <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <h2 className="text-xl font-semibold mb-4">Advanced Filters</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Start Date</label>
+        {/* ---------- Filters ---------- */}
+        <motion.div
+          variants={fadeVariants}
+          initial="hidden"
+          animate="show"
+          transition={{ duration: .4, delay: .1 }}
+          className="bg-white rounded-lg shadow p-6 mb-6"
+        >
+          <h2 className="text-xl font-semibold mb-4">Advanced Filters</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              { name:'startDate', type:'date', label:'Start Date' },
+              { name:'endDate',   type:'date', label:'End Date' },
+              { name:'category',  type:'text', label:'Category', placeholder:'e.g., Restaurants'}
+            ].map(f => (
+              <div key={f.name}>
+                <label className="block text-sm font-medium text-gray-700">{f.label}</label>
                 <input
-                  type="date"
-                  name="startDate"
-                  value={filters.startDate}
+                  {...f}
+                  value={filters[f.name]}
                   onChange={handleFilterChange}
-                  className="mt-1 block w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  className="mt-1 w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">End Date</label>
-                <input
-                  type="date"
-                  name="endDate"
-                  value={filters.endDate}
-                  onChange={handleFilterChange}
-                  className="mt-1 block w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Category</label>
-                <input
-                  type="text"
-                  name="category"
-                  placeholder="e.g., Restaurants"
-                  value={filters.category}
-                  onChange={handleFilterChange}
-                  className="mt-1 block w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                />
-              </div>
-            </div>
-            <div className="mt-4 flex justify-end">
-              <button
-                onClick={handleExport}
-                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400"
-              >
-                Print / Export
-              </button>
-            </div>
+            ))}
           </div>
+          <div className="mt-4 flex justify-end">
+            <button
+              onClick={()=>window.print()}
+              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400 transition"
+            >
+              Print / Export
+            </button>
+          </div>
+        </motion.div>
 
-          {errorMessage && (
-            <p className="text-red-600 text-center mb-4">{errorMessage}</p>
-          )}
-          {loading && (
-            <p className="text-indigo-600 text-center mb-4">Loading report data...</p>
-          )}
+        {/* ---------- Alerts / spinner ---------- */}
+        {errorMessage && <p className="text-red-600 text-center mb-4">{errorMessage}</p>}
+        {loading && (
+          <div className="flex justify-center my-10">
+            <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
 
-          {!loading && !errorMessage && (
-            <>
-              {/* Chart 1: Bar Chart for Monthly Overview */}
-              <div className="bg-white rounded-lg shadow p-6 mb-8">
-                <h2 className="text-xl font-semibold mb-4">Monthly Overview (Bar Chart)</h2>
-                <BarChart data={monthlyOverview} width={600} height={300} />
-              </div>
+        {/* ---------- Charts ---------- */}
+        {!loading && !errorMessage && (
+          <>
+            {card('Monthly Overview (Bar Chart)',
+              <BarChart data={monthlyOverview} width={600} height={300} />)}
 
-              {/* Chart 2: Line Chart for Daily Trends */}
-              <div className="bg-white rounded-lg shadow p-6 mb-8">
-                <h2 className="text-xl font-semibold mb-4">Daily Spending Trends (Line Chart)</h2>
-                <LineChart data={dailyTrends} width={600} height={300} />
-              </div>
+            {card('Daily Spending Trends (Line Chart)',
+              <LineChart data={dailyTrends} width={600} height={300} />)}
 
-              {/* Chart 3: Pie Chart for Category Distribution */}
-              <div className="bg-white rounded-lg shadow p-6 mb-8">
-                <h2 className="text-xl font-semibold mb-4">Category Distribution (Pie Chart)</h2>
-                <PieChart data={categoryDistribution} width={400} height={400} innerRadius={80} />
-              </div>
+            {card('Category Distribution (Pie Chart)',
+              <PieChart data={categoryDistribution} width={400} height={400} innerRadius={80} />)}
 
-              {/* Chart 4: Area Chart for Daily Trends */}
-              <div className="bg-white rounded-lg shadow p-6 mb-8">
-                <h2 className="text-xl font-semibold mb-4">Daily Spending Trends (Area Chart)</h2>
-                <AreaChart data={areaChartData} width={600} height={300} />
-              </div>
+            {card('Daily Spending Trends (Area Chart)',
+              <AreaChart data={areaChartData} width={600} height={300} />)}
 
-              {/* Chart 5: Scatter Plot (Day vs Amount) */}
-              <div className="bg-white rounded-lg shadow p-6 mb-8">
-                <h2 className="text-xl font-semibold mb-4">Scatter Plot (Day vs Amount)</h2>
-                <ScatterPlot data={scatterData} width={600} height={300} />
-              </div>
+            {card('Scatter Plot (Day vs Amount)',
+              <ScatterPlot data={scatterData} width={600} height={300} />)}
 
-              {/* Chart 6: Stacked Bar Chart (Categories over Days) */}
-              <div className="bg-white rounded-lg shadow p-6 mb-8">
-                <h2 className="text-xl font-semibold mb-4">Stacked Bar Chart (Categories over Days)</h2>
-                <StackedBarChart data={stackedData} keys={stackKeys} width={600} height={300} />
-              </div>
-            </>
-          )}
-        </div>
+            {card('Stacked Bar Chart (Categories over Days)',
+              <StackedBarChart data={stackedData} keys={stackKeys} width={600} height={300} />)}
+          </>
+        )}
       </main>
     </div>
   );

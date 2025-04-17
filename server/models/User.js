@@ -1,4 +1,3 @@
-// models/User.js
 const mongoose = require('mongoose');
 const crypto = require("crypto");
 const bcrypt = require("bcrypt");
@@ -10,35 +9,32 @@ const cryptoIv = Buffer.from(process.env.DB_CRYPTO_IV, 'hex');
 const UserSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: {
-      value: true,
-      message: 'Name is required'
-    } },
+    required: [true, 'Name is required']
+  },
   email: {
     type: String,
-    required: {
-      value: true,
-      message: 'Email is required'
-    },
-    unique: {
-      value: true,
-    },
+    required: [true, 'Email is required'],
+    unique: true,
     validate: {
       validator: validateEmail,
       message: '{VALUE} is not a valid email'
-    }},
+    }
+  },
   passwordHash: {
     type: String,
-    alias:"password",
-    required: {
-      value: true,
-      message: 'Password is required'
-    } },
-  passwordSalt: { type: String },
-  profileImage: { 
-    type: String, 
-    default: ""  // Stores the image URL or path
+    alias: "password",
+    required: [true, 'Password is required']
   },
+  passwordSalt: { type: String },
+  profileImage: {
+    type: String,
+    default: ""
+  },
+
+  // ✅ New Fields for Forgot/Reset Password
+  resetToken: { type: String },
+  resetTokenExpire: { type: Date }
+
 }, { timestamps: true });
 
 function encrypt(text) {
@@ -52,28 +48,12 @@ function decrypt(text) {
   const decipher = crypto.createDecipheriv(cryptoAlgorithm, cryptoKey, cryptoIv);
   let decrypted = decipher.update(text, 'hex', 'utf8');
   decrypted += decipher.final('utf8');
-
   return decrypted;
 }
 
 function validateEmail(email) {
   let regExp = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-  return regExp.test(email)
+  return regExp.test(email);
 }
-
-UserSchema.pre("save", async function (next) {
-  const user = this;
-
-  if (user.isModified("email")) {
-    user.email = user.email.toLowerCase();
-  }
-
-  if (user.isModified("passwordHash")) {
-    const salt = await bcrypt.genSalt(Number(process.env.DB_CRYPTO_SALT_ROUNDS));
-    user.passwordHash = await bcrypt.hash(user.passwordHash, salt);
-    user.passwordSalt = salt;
-  }
-  next();
-});
 
 module.exports = mongoose.model('User', UserSchema);

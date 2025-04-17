@@ -4,48 +4,125 @@ const mongoose = require('mongoose');
 exports.getReportData = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { startDate, endDate, category } = req.query;
-    
-    const filter = { userId: new mongoose.Types.ObjectId(userId) };
-    if (startDate) filter.date = { ...filter.date, $gte: new Date(startDate) };
-    if (endDate) filter.date = { ...filter.date, $lte: new Date(endDate) };
-    if (category) filter.category = category;
-    
-    // Daily trends: group transactions by date
-    const dailyTrendsAgg = await Transaction.aggregate([
-      { $match: filter },
+
+    const transactions = await Transaction.find({ userId });
+
+    // Monthly Overview
+    const monthlyOverview = await Transaction.aggregate([
+      { $match: { userId: new mongoose.Types.ObjectId(userId) } },
+      {
+        $group: {
+          _id: { month: { $month: "$date" }, year: { $year: "$date" } },
+          totalSpent: { $sum: "$amount" }
+        }
+      },
+      { $sort: { '_id.year': 1, '_id.month': 1 } }
+    ]);
+
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const formattedMonthly = monthlyOverview.map(item => ({
+      month: `${monthNames[item._id.month - 1]} ${item._id.year}`,
+      totalSpent: item.totalSpent
+    }));
+
+    // Daily Trends
+    const dailyTrends = await Transaction.aggregate([
+      { $match: { userId: new mongoose.Types.ObjectId(userId) } },
       {
         $group: {
           _id: { $dateToString: { format: "%Y-%m-%d", date: "$date" } },
           totalSpent: { $sum: "$amount" }
         }
       },
-      { $sort: { "_id": 1 } }
+      {
+        $project: {
+          date: "$_id",
+          totalSpent: 1,
+          _id: 0
+        }
+      },
+      { $sort: { date: 1 } }
     ]);
-    const dailyTrends = dailyTrendsAgg.map(item => ({
-      date: item._id,
-      totalSpent: item.totalSpent
-    }));
-    
-    // Category distribution: group transactions by category
-    const categoryAgg = await Transaction.aggregate([
-      { $match: filter },
+
+    // Category Distribution
+    const categoryDistribution = await Transaction.aggregate([
+      { $match: { userId: new mongoose.Types.ObjectId(userId) } },
       {
         $group: {
           _id: "$category",
           amount: { $sum: "$amount" }
         }
       },
+      {
+        $project: {
+          category: "$_id",
+          amount: 1,
+          _id: 0
+        }
+      },
       { $sort: { amount: -1 } }
     ]);
-    const categoryDistribution = categoryAgg.map(item => ({
-      category: item._id,
-      amount: item.amount
-    }));
-    
-    res.json({ dailyTrends, categoryDistribution });
+
+    // ✅ Stacked Bar Chart (Group by date and category)
+    const stackedDataAggregation = await Transaction.aggregate([
+      { $match: { userId: new mongoose.Types.ObjectId(userId) } },
+      {
+        $group: {
+          _id: {
+            date: { $dateToString: { format: "%Y-%m-%d", date: "$date" } },
+            category: "$category"
+          },
+          total: { $sum: "$amount" }
+        }
+      },
+      {
+        $group: {
+          _id: "$_id.date",
+          categoryAmounts: {
+            $push: { k: "$_id.category", v: "$total" }
+          }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          date: "$_id",
+          categories: {
+            $arrayToObject: "$categoryAmounts"
+          }
+        }
+      },
+      {
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: [{ date: "$date" }, "$categories"]
+          }
+        }
+      },
+      { $sort: { date: 1 } }
+    ]);
+
+    // ✅ Extract unique keys from stacked data
+    const stackKeysSet = new Set();
+    stackedDataAggregation.forEach(row => {
+      Object.keys(row).forEach(k => {
+        if (k !== "date") stackKeysSet.add(k);
+      });
+    });
+
+    const stackKeys = [...stackKeysSet];
+
+    // Response
+    res.json({
+      dailyTrends,
+      monthlyOverview: formattedMonthly,
+      categoryDistribution,
+      stackedData: stackedDataAggregation,
+      stackKeys
+    });
+
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error generating report data' });
+    console.error("Error in getReportData:", err);
+    res.status(500).json({ error: "Failed to fetch report data." });
   }
 };

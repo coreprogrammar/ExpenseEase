@@ -3,6 +3,9 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const budgetController = require('../controllers/budgetController');
 
+
+
+
 // GET all budgets
 router.get('/', auth, budgetController.getAllBudgets);
 
@@ -17,5 +20,9 @@ router.delete('/:id', auth, budgetController.deleteBudget);
 
 // GET usage data for all budgets
 router.get('/usage', auth, budgetController.getBudgetsUsage);
+
+// Recalculate budget spent values
+router.post('/recalculate', auth, budgetController.recalculateSpent);
+
 
 module.exports = router;
