@@ -1,0 +1,17 @@
+{
+  "name": "expenseease-monorepo",
+  "private": true,
+
+  "scripts": {
+
+    "build": "npm --prefix ui-server run build"
+  },
+
+  
+  "dependencies": {
+    "express": "^4",
+    "mongoose": "^7",
+    "cors": "^2",
+    "dotenv": "^16"
+  }
+}
