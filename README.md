@@ -1,29 +1,43 @@
-#ExpenseEase
+# ExpenseEase 💸
 
-1. Project Title
-ExpenseEase
+A full‑stack **personal‑finance web‑app** that lets users
 
-2. Project Description
+* upload PDF bank statements and auto‑parse transactions  
+* manage categories and budgets with smart usage alerts  
+* view interactive reports (bar, line, pie, scatter, stacked, area)  
+* receive password‑reset emails via Ethereal (or any SMTP)  
+* export CSV and print reports
 
-ExpenseEase is a comprehensive personal finance web application that enables users to:
+Built with **React + Vite + Tailwind CSS** in `ui-server/` and
+**Node/Express + MongoDB** in `server/`.
 
-- Track expenses
-- Set budgets
-- Receive intelligent spending suggestions
+---
 
-It integrates with banking APIs (like Plaid) for syncing real-time transactions, reducing manual data entry, and provides data visualization via interactive charts.
+## Table of Contents
 
-3. Features
+1. [Quick Start](#quick-start)  
+2. [Monorepo Layout](#monorepo-layout)  
+3. [Environment Variables](#environment-variables)  
+4. [Development Scripts](#development-scripts)  
+5. [REST API Reference](#rest-api-reference)  
+6. [User Guide](#user-guide)  
+7. [Troubleshooting & FAQ](#troubleshooting--faq)  
+8. [Deployment (Vercel + Render)](#deployment)  
+9. [Contributing](#contributing)  
+10. [License](#license)
 
-- Secure User Authentication – JWT-based login/signup.
-- Banking API Integration – Sync bank transactions automatically.
-- Budget Management – Create, edit, and monitor budgets for various categories.
-- Data Visualization – Charts and graphs for spending insights.
-- Intelligent Spending Suggestions – Simple rules-based recommendations based on user habits.
+---
 
-4. Tech Stack
+## Quick Start
 
-- Frontend: React, Tailwind CSS, Charting Library (e.g., Chart.js)
-- Backend: Node.js, Express.js
-- Database: MongoDB (Mongoose for ODM)
-- Banking API: Plaid or similar (optional for real-time data)
+```bash
+# 1 clone + install both workspaces
+git clone https://github.com/<you>/ExpenseEase.git
+cd ExpenseEase
+
+# 2 copy env templates (see below) and fill secrets
+cp server/.env.example server/.env
+cp ui-server/.env.example ui-server/.env
+
+# 3 run everything
+npm run dev       # ↳ concurrently runs ui (5173) + API (5000)
