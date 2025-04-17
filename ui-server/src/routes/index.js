@@ -1,3 +1,5 @@
+
+
 const routes = {
   home: '/',
   signup: '/sign-up',
@@ -10,6 +12,9 @@ const routes = {
   categoryManage: "/categories",
   transactions: "/transactions",
   budget: "/budget",
-  report: "/reports"
+  report: "/reports",
+  resetPassword: "/reset/:token",
+  about: "/about",
+  services: "/services",
 };
 export default routes;

@@ -1,261 +1,244 @@
-import React, { useState } from 'react';
+// src/pages/PDFUpload.jsx
+import React, { useState } from "react";
 
-function PDFUpload() {
+const PDFUpload = () => {
+  /* ───────── state ───────── */
   const [selectedFile, setSelectedFile] = useState(null);
-  const [uploading, setUploading] = useState(false);
-  const [parsedData, setParsedData] = useState([]);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [finalizing, setFinalizing] = useState(false);
+  const [uploading,    setUploading   ] = useState(false);
+  const [parsedData,   setParsedData  ] = useState([]);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [finalizing,   setFinalizing  ] = useState(false);
 
-  // 1) File selection
+  /* ───────── handlers ───────── */
   const handleFileChange = (e) => {
-    setSelectedFile(e.target.files[0]);
+    setSelectedFile(e.target.files[0] ?? null);
     setParsedData([]);
-    setErrorMessage('');
+    setErrorMessage("");
   };
 
-  // 2) Upload to parse PDF
+  /* ---------- 1. upload & parse ---------- */
   const handleUpload = async () => {
     if (!selectedFile) return;
     setUploading(true);
-    setErrorMessage('');
+    setErrorMessage("");
 
     try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("You must be logged in to upload PDFs.");
+
       const formData = new FormData();
-      formData.append('statement', selectedFile);
+      formData.append("statement", selectedFile);
 
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setErrorMessage('You must be logged in to upload PDFs.');
-        setUploading(false);
-        return;
-      }
-
-      const res = await fetch('http://localhost:5000/api/pdf/upload', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+      const res = await fetch("http://localhost:5000/api/pdf/upload", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
 
-      if (!res.ok) {
-        const errData = await res.json();
-        setErrorMessage(errData.error || 'Error parsing PDF');
-      } else {
-        const data = await res.json();
-        setParsedData(data.transactions || []);
-      }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error parsing PDF");
+
+      setParsedData(data.transactions || []);
     } catch (err) {
-      console.error(err);
-      setErrorMessage('Could not upload or parse PDF');
+      setErrorMessage(err.message || "Could not upload or parse PDF.");
     } finally {
       setUploading(false);
     }
   };
 
-  // 3) Inline editing for each transaction row
+  /* ---------- inline edit helpers ---------- */
   const handleInputChange = (idx, field, value) => {
-    const updated = [...parsedData];
-    updated[idx] = {
-      ...updated[idx],
-      [field]: value,
-    };
-    setParsedData(updated);
+    setParsedData((prev) => {
+      const copy = [...prev];
+      copy[idx] = { ...copy[idx], [field]: value };
+      return copy;
+    });
   };
 
-  // 4) Remove a single transaction row
-  const handleRemove = (idx) => {
-    const updated = parsedData.filter((_, i) => i !== idx);
-    setParsedData(updated);
-  };
+  const handleRemove = (idx) =>
+    setParsedData((prev) => prev.filter((_, i) => i !== idx));
 
-  // 5) Confirm all => finalize in DB
+  /* ---------- 2. confirm / cancel ---------- */
   const handleConfirmAll = async () => {
     if (!parsedData.length) return;
     setFinalizing(true);
-    setErrorMessage('');
+    setErrorMessage("");
 
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setErrorMessage('Please log in to finalize transactions.');
-        setFinalizing(false);
-        return;
-      }
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("Please log in to finalize transactions.");
 
-      const res = await fetch('http://localhost:5000/api/pdf/finalize', {
-        method: 'POST',
+      const res = await fetch("http://localhost:5000/api/pdf/finalize", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ transactions: parsedData }),
       });
 
-      if (!res.ok) {
-        const errData = await res.json();
-        setErrorMessage(errData.error || 'Error finalizing transactions');
-      } else {
-        alert('Transactions finalized successfully!');
-        setParsedData([]);
-      }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error finalizing transactions");
+
+      alert("Transactions finalized successfully!");
+      setParsedData([]);
+      setSelectedFile(null);
     } catch (err) {
-      console.error(err);
-      setErrorMessage('Could not finalize transactions');
+      setErrorMessage(err.message || "Could not finalize transactions.");
     } finally {
       setFinalizing(false);
     }
   };
 
-  // 6) Cancel all => discard parsed data
   const handleCancelAll = () => {
     setParsedData([]);
-    setErrorMessage('');
+    setSelectedFile(null);
+    setErrorMessage("");
   };
 
+  /* ───────── UI ───────── */
   return (
-    <div className="max-w-2xl mx-auto p-4">
-      <h2 className="text-2xl font-semibold mb-4 text-center">
-        Upload PDF Statement (Inline Edit + Confirm)
-      </h2>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 flex items-start justify-center py-10 font-sans">
+      <div className="w-full max-w-4xl bg-white shadow-2xl rounded-2xl p-8">
 
-      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-        <input
-          type="file"
-          accept="application/pdf"
-          onChange={handleFileChange}
-          className="file:mr-2 file:py-1 file:px-3 file:border-0 file:bg-gray-200 file:text-sm file:cursor-pointer
-                     text-sm rounded-md block
-                     focus:ring-2 focus:ring-indigo-300"
-        />
-        {selectedFile && (
-          <p className="text-sm text-gray-600">File: {selectedFile.name}</p>
-        )}
-        <button
-          onClick={handleUpload}
-          disabled={!selectedFile || uploading}
-          className={`px-4 py-2 mt-2 sm:mt-0 rounded-md text-white font-semibold 
-                      ${uploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'}`}
-        >
-          {uploading ? 'Processing...' : 'Submit PDF'}
-        </button>
-      </div>
+        {/* Header */}
+        <h2 className="text-3xl font-bold text-center text-indigo-600 mb-1">
+          PDF Statement Uploader
+        </h2>
+        <p className="text-center text-gray-500 mb-8">
+          Upload, review &amp; import transactions seamlessly
+        </p>
 
-      {uploading && (
-        <div className="flex items-center justify-center mb-4">
-          <div className="inline-block w-5 h-5 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mr-2" />
-          <span className="text-indigo-600 font-semibold text-sm">Parsing PDF...</span>
+        {/* Upload box */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-8
+                        border-2 border-dashed border-indigo-300 rounded-xl p-6
+                        hover:border-indigo-400 transition">
+          <input
+            id="fileInput"
+            type="file"
+            accept="application/pdf"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+          <label
+            htmlFor="fileInput"
+            className="flex-1 cursor-pointer px-6 py-3 bg-indigo-50 hover:bg-indigo-100 rounded-lg
+                       border border-indigo-200 text-indigo-600 font-medium text-sm text-center transition"
+          >
+            {selectedFile ? "Change PDF" : "Select PDF"}
+          </label>
+
+          {selectedFile && (
+            <span className="flex-1 text-sm truncate text-gray-700">
+              {selectedFile.name}
+            </span>
+          )}
+
+          <button
+            onClick={handleUpload}
+            disabled={!selectedFile || uploading}
+            className={`px-6 py-3 rounded-lg text-white text-sm font-semibold shadow transition
+                        ${uploading
+                          ? "bg-gray-400 cursor-not-allowed"
+                          : "bg-indigo-600 hover:bg-indigo-700"}`}
+          >
+            {uploading ? "Processing…" : "Parse PDF"}
+          </button>
         </div>
-      )}
 
-      {errorMessage && (
-        <p className="text-red-600 text-center mb-4">{errorMessage}</p>
-      )}
-
-      {parsedData.length > 0 && (
-        <div className="mt-6">
-          <h3 className="text-lg font-semibold mb-2 text-center">
-            Review &amp; Edit Transactions
-          </h3>
-          <table className="table-auto w-auto mx-auto border border-gray-300 divide-y divide-gray-300">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="px-3 py-2 text-left text-sm font-semibold text-gray-700">Date</th>
-                <th className="px-3 py-2 text-left text-sm font-semibold text-gray-700">Post Date</th>
-                <th className="px-3 py-2 text-left text-sm font-semibold text-gray-700">Description</th>
-                <th className="px-3 py-2 text-left text-sm font-semibold text-gray-700">Category</th>
-                <th className="px-3 py-2 text-left text-sm font-semibold text-gray-700">Amount</th>
-                <th className="px-3 py-2 text-left text-sm font-semibold text-gray-700">Remove</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {parsedData.map((tx, idx) => (
-                <tr key={idx} className="whitespace-normal">
-                  <td className="px-3 py-2">
-                    <input
-                      type="text"
-                      value={tx.transDate || ''}
-                      onChange={(e) => handleInputChange(idx, 'transDate', e.target.value)}
-                      className="border border-gray-300 rounded-md text-sm px-2 py-1
-                                 focus:outline-none focus:ring-2 focus:ring-indigo-300 w-24"
-                    />
-                  </td>
-                  <td className="px-3 py-2">
-                    <input
-                      type="text"
-                      value={tx.postDate || ''}
-                      onChange={(e) => handleInputChange(idx, 'postDate', e.target.value)}
-                      className="border border-gray-300 rounded-md text-sm px-2 py-1
-                                 focus:outline-none focus:ring-2 focus:ring-indigo-300 w-24"
-                    />
-                  </td>
-                  <td className="px-3 py-2">
-                    <input
-                      type="text"
-                      value={tx.description || ''}
-                      onChange={(e) => handleInputChange(idx, 'description', e.target.value)}
-                      className="border border-gray-300 rounded-md text-sm px-2 py-1
-                                 focus:outline-none focus:ring-2 focus:ring-indigo-300 w-48"
-                    />
-                  </td>
-                  <td className="px-3 py-2">
-                    <input
-                      type="text"
-                      value={tx.category || ''}
-                      onChange={(e) => handleInputChange(idx, 'category', e.target.value)}
-                      className="border border-gray-300 rounded-md text-sm px-2 py-1
-                                 focus:outline-none focus:ring-2 focus:ring-indigo-300 w-36"
-                    />
-                  </td>
-                  <td className="px-3 py-2">
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={tx.amount || ''}
-                      onChange={(e) => handleInputChange(idx, 'amount', parseFloat(e.target.value) || 0)}
-                      className="border border-gray-300 rounded-md text-sm px-2 py-1
-                                 focus:outline-none focus:ring-2 focus:ring-indigo-300 w-24"
-                    />
-                  </td>
-                  <td className="px-3 py-2">
-                    <button
-                      onClick={() => handleRemove(idx)}
-                      className="px-2 py-1 bg-red-500 hover:bg-red-600 text-white rounded-md text-sm"
-                    >
-                      Remove
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          {/* Button Row: Confirm All + Cancel side by side */}
-          <div className="flex justify-center gap-4 mt-4">
-            <button
-              onClick={handleConfirmAll}
-              disabled={finalizing}
-              className={`px-4 py-2 rounded-md text-white font-semibold
-                          ${finalizing ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}
-            >
-              {finalizing ? 'Finalizing...' : 'Confirm All'}
-            </button>
-
-            {/* Cancel discards all parsed data before finalizing */}
-            <button
-              onClick={handleCancelAll}
-              disabled={finalizing}
-              className={`px-4 py-2 rounded-md text-white font-semibold
-                          ${finalizing ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-500 hover:bg-red-600'}`}
-            >
-              Cancel
-            </button>
+        {/* Spinner */}
+        {uploading && (
+          <div className="flex justify-center items-center mb-6">
+            <span className="w-6 h-6 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+            <span className="ml-3 text-indigo-600 font-medium">Reading file…</span>
           </div>
-        </div>
-      )}
+        )}
+
+        {/* Error */}
+        {errorMessage && (
+          <p className="text-center text-red-600 mb-6">{errorMessage}</p>
+        )}
+
+        {/* Table */}
+        {parsedData.length > 0 && (
+          <>
+            <h3 className="text-xl font-semibold text-center mb-4">
+              Review &amp; Edit Transactions
+            </h3>
+
+            <div className="overflow-auto rounded-lg shadow-inner">
+              <table className="min-w-full text-sm">
+                <thead className="bg-indigo-50">
+                  {["Date","Post Date","Description","Category","Amount",""]
+                    .map((h)=>(<th key={h} className="px-4 py-3 font-semibold text-left text-indigo-700">{h}</th>))}
+                </thead>
+                <tbody>
+                  {parsedData.map((tx, idx) => (
+                    <tr key={idx} className="even:bg-gray-50">
+                      {["transDate","postDate","description","category"].map((field)=>(
+                        <td key={field} className="px-4 py-2">
+                          <input
+                            type="text"
+                            value={tx[field] ?? ""}
+                            onChange={(e)=>handleInputChange(idx, field, e.target.value)}
+                            className="w-full border border-gray-300 rounded-md px-2 py-1
+                                       focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                          />
+                        </td>
+                      ))}
+                      {/* amount */}
+                      <td className="px-4 py-2">
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={tx.amount ?? ""}
+                          onChange={(e)=>handleInputChange(idx,"amount",parseFloat(e.target.value)||0)}
+                          className="w-28 border border-gray-300 rounded-md px-2 py-1
+                                     focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                        />
+                      </td>
+                      <td className="px-4 py-2">
+                        <button
+                          onClick={()=>handleRemove(idx)}
+                          className="px-2 py-1 bg-red-500 hover:bg-red-600 text-white rounded-md shadow-sm transition"
+                        >
+                          ✕
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Confirm / Cancel */}
+            <div className="flex justify-center gap-6 mt-6">
+              <button
+                onClick={handleConfirmAll}
+                disabled={finalizing}
+                className={`px-6 py-3 rounded-lg font-semibold text-white shadow transition
+                            ${finalizing
+                              ? "bg-gray-400 cursor-not-allowed"
+                              : "bg-green-600 hover:bg-green-700"}`}
+              >
+                {finalizing ? "Saving…" : "Confirm All"}
+              </button>
+              <button
+                onClick={handleCancelAll}
+                disabled={finalizing}
+                className={`px-6 py-3 rounded-lg font-semibold text-white shadow transition
+                            ${finalizing
+                              ? "bg-gray-400 cursor-not-allowed"
+                              : "bg-red-500 hover:bg-red-600"}`}
+              >
+                Cancel
+              </button>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
-}
+};
 
 export default PDFUpload;

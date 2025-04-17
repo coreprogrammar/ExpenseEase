@@ -30,6 +30,10 @@ const budgetSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  spent: {
+    type: Number,
+    default: 0
+  },
   categories: [{
     type: String, // or type: mongoose.Schema.Types.ObjectId if referencing Category
     default: [],  
@@ -44,6 +48,8 @@ const budgetSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   }
+ 
+  
 }, { timestamps: true });
 
 module.exports = mongoose.model('Budget', budgetSchema);

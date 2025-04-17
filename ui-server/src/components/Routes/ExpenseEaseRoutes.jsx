@@ -13,6 +13,10 @@ import Categories from "../pages/Categories.jsx";
 import TransactionPage from "../pages/TransactionPage.jsx";
 import BudgetPage from "../pages/BudgetPage.jsx";
 import Reports from "../pages/Reports.jsx";
+import About from "../pages/About.jsx";
+import Services from "../pages/Services.jsx";
+import Footer from "../pages/Footer.jsx";
+
 
 
 export default function ExpenseEaseRoutes() {
@@ -21,7 +25,9 @@ export default function ExpenseEaseRoutes() {
       <Route path={routes.home} element={<Home />} />
       <Route path={routes.signup} element={<Register />} />
       <Route path={routes.login} element={<Login />} />
-      
+      <Route path={routes.about} element={<About />} />
+      <Route path={routes.services} element={<Services />} />
+
       {/* ✅ Forgot & Reset Password Routes */}
       <Route path={routes.forgotPassword} element={<ForgotPassword />} />
       <Route path={routes.resetPassword} element={<ResetPassword />} />

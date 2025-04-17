@@ -1,126 +1,236 @@
-import AuthApi from "../../api/auth.js";
+//  src/pages/auth/Register.jsx
 import { useState } from "react";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import AuthApi from "../../api/auth";
 
-async function register(formData) {
-  return await AuthApi.register(formData);
-}
+const register = async (formData) => AuthApi.register(formData);
 
 export default function Register() {
+  /* ─── state ──────────────────────────────── */
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: ""
+  });
+  const [alert, setAlert] = useState(null);      // {message, ok}
+  const [submitting, setSubmitting] = useState(false);
+  const [showPwd, setShowPwd] = useState(false);
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  /* ─── helpers ────────────────────────────── */
+  const pwdStrength = (pwd) => {
+    if (pwd.length < 6) return 0;
+    let score = 0;
+    if (/[A-Z]/.test(pwd)) score += 1;
+    if (/[a-z]/.test(pwd)) score += 1;
+    if (/\d/.test(pwd)) score += 1;
+    if (/[^A-Za-z0-9]/.test(pwd)) score += 1;
+    return score;
+  };
+
+  /* ─── submit ─────────────────────────────── */
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (submitting) return;
 
     if (formData.password !== formData.confirmPassword) {
-      setAlert({
-        message: "Passwords do not match",
-        class: " border-red-400 text-red-700 bg-red-100"
+      return setAlert({ ok: false, message: "Passwords do not match" });
+    }
+
+    setSubmitting(true);
+    setAlert(null);
+    try {
+      const res = await register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password
       });
-      return;
-    }
 
-    const data = {
-      name: formData.name,
-      email: formData.email,
-      password: formData.password
-    };
-
-    const response = await register(data);
-    console.log(response);
-
-    let message = "";
-
-    if (response.success === false) {
-      if (response.errors) {
-        for (const [, value] of Object.entries(response.errors)) {
-          message += `<li>${value.message}</li>`;
+      if (!res.success) {
+        let msg = res.message || "Registration failed";
+        if (res.errors) {
+          msg = Object.values(res.errors)
+            .map((v) => `<li>${v.message}</li>`)
+            .join("");
+          msg = `<ul>${msg}</ul>`;
         }
-        message = `<ul>${message}</ul>`;
+        setAlert({ ok: false, message: msg });
+      } else {
+        setAlert({
+          ok: true,
+          message:
+            "Account created! Please check your inbox to verify your email."
+        });
+        setFormData({
+          name: "",
+          email: "",
+          password: "",
+          confirmPassword: ""
+        });
       }
-      else {
-        message += `${response.message}`;
-      }
+    } catch (err) {
+      setAlert({ ok: false, message: err.message });
+    } finally {
+      setSubmitting(false);
     }
+  };
 
-    setAlert({
-      message: message,
-      class: response.success ? " border-green-400 text-green-700 bg-green-100" : " border-red-400 text-red-700 bg-red-100"
-    });
-  }
-
-  const [alert, setAlert] = useState(false);
-
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
-  });
-
+  /* ─── view ───────────────────────────────── */
   return (
-    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-        <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900">Create your account</h2>
-      </div>
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12">
+      <div
+        className={`w-full max-w-sm rounded-xl bg-white p-8 shadow-lg transition-all ${
+          alert && !alert.ok ? "animate-shake" : ""
+        }`}
+      >
+        <h2 className="mb-8 text-center text-3xl font-bold text-indigo-600">
+          Create your account
+        </h2>
 
-      <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+        {alert && (
+          <div
+            className={`mb-6 rounded-md border px-4 py-3 text-sm ${
+              alert.ok
+                ? "border-emerald-300 bg-emerald-50 text-emerald-800"
+                : "border-red-300 bg-red-50 text-red-700"
+            }`}
+            dangerouslySetInnerHTML={{ __html: alert.message }}
+          />
+        )}
 
-        {alert && <div className={"border px-4 py-3 rounded relative mb-8" + alert.class} role="alert">
-          <span className="block sm:inline" dangerouslySetInnerHTML={{__html: alert.message}}></span>
-        </div>}
-
-        <form className="space-y-6"  method="POST" onSubmit={handleSubmit}>
-
+        <form className="space-y-5" onSubmit={handleSubmit}>
+          {/* name */}
           <div>
-            <label htmlFor="name" className="block text-sm/6 font-medium text-gray-900">Name</label>
-            <div className="mt-2">
-              <input type="text" name="name" id="name" autoComplete="name" required="required"
-                     value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                     className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-            </div>
+            <label className="block text-sm font-medium text-gray-700">
+              Name
+            </label>
+            <input
+              type="text"
+              required
+              className="mt-1 w-full rounded-md border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              value={formData.name}
+              onChange={(e) =>
+                setFormData((s) => ({ ...s, name: e.target.value }))
+              }
+            />
           </div>
 
+          {/* email */}
           <div>
-            <label htmlFor="email" className="block text-sm/6 font-medium text-gray-900">Email address</label>
-            <div className="mt-2">
-              <input type="email" name="email" id="email" autoComplete="email" required=""
-                     value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                     className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-            </div>
+            <label className="block text-sm font-medium text-gray-700">
+              Email address
+            </label>
+            <input
+              type="email"
+              required
+              className="mt-1 w-full rounded-md border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              value={formData.email}
+              onChange={(e) =>
+                setFormData((s) => ({ ...s, email: e.target.value }))
+              }
+            />
           </div>
 
+          {/* password */}
           <div>
-            <div className="flex items-center justify-between">
-              <label htmlFor="password" className="block text-sm/6 font-medium text-gray-900">Password</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Password
+            </label>
+            <div className="relative mt-1">
+              <input
+                type={showPwd ? "text" : "password"}
+                required
+                className="w-full rounded-md border-gray-300 px-3 py-2 pr-10 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                value={formData.password}
+                onChange={(e) =>
+                  setFormData((s) => ({ ...s, password: e.target.value }))
+                }
+              />
+              <button
+                type="button"
+                onClick={() => setShowPwd(!showPwd)}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+              >
+                {showPwd ? (
+                  <EyeSlashIcon className="h-5 w-5" />
+                ) : (
+                  <EyeIcon className="h-5 w-5" />
+                )}
+              </button>
             </div>
-            <div className="mt-2">
-              <input type="password" name="password" id="password" autoComplete="current-password" required=""
-                     value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                     className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-            </div>
+
+            {/* strength */}
+            {formData.password && (
+              <div className="mt-1 flex h-2 overflow-hidden rounded bg-gray-200">
+                <div
+                  className={`transition-all ${
+                    ["bg-red-500", "bg-yellow-500", "bg-yellow-400", "bg-emerald-500"][pwdStrength(formData.password)]
+                  }`}
+                  style={{
+                    width: `${(pwdStrength(formData.password) / 4) * 100}%`
+                  }}
+                />
+              </div>
+            )}
           </div>
 
+          {/* confirm pwd */}
           <div>
-            <div className="flex items-center justify-between">
-              <label htmlFor="confirmPassword" className="block text-sm/6 font-medium text-gray-900">Confirm Password</label>
-            </div>
-            <div className="mt-2">
-              <input type="password" name="confirmPassword" id="confirmPassword" autoComplete="current-password" required=""
-                     value={formData.confirmPassword} onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                     className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-            </div>
+            <label className="block text-sm font-medium text-gray-700">
+              Confirm Password
+            </label>
+            <input
+              type={showPwd ? "text" : "password"}
+              required
+              className="mt-1 w-full rounded-md border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              value={formData.confirmPassword}
+              onChange={(e) =>
+                setFormData((s) => ({
+                  ...s,
+                  confirmPassword: e.target.value
+                }))
+              }
+            />
           </div>
 
-          <div>
-            <button type="submit"
-                    className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Sign
-              up
-            </button>
-          </div>
-          <p className="mt-4 text-sm text-gray-600 text-center">
-          Already have an account? <a href="/login" className="text-indigo-600 font-medium">Login</a>
-        </p>
+          {/* submit */}
+          <button
+            type="submit"
+            disabled={submitting}
+            className="group relative flex w-full items-center justify-center rounded-md bg-indigo-600 py-2 text-sm font-semibold text-white shadow hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-indigo-400"
+          >
+            {submitting && (
+              <svg
+                className="absolute left-4 h-5 w-5 animate-spin text-indigo-100"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v8H4z"
+                />
+              </svg>
+            )}
+            Sign&nbsp;up
+          </button>
         </form>
 
+        <p className="mt-6 text-center text-sm text-gray-600">
+          Already have an account?{" "}
+          <a href="/login" className="font-medium text-indigo-600 hover:underline">
+            Login
+          </a>
+        </p>
       </div>
     </div>
   );
