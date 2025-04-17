@@ -1,43 +1,106 @@
-# ExpenseEase 💸
+<!-- README.md -->
+<h1 align="center">
+  ExpenseEase 💸
+</h1>
 
-A full‑stack **personal‑finance web‑app** that lets users
+<p align="center">
+  <em>Upload → Parse → Track → Save.</em><br>
+  A modern, full‑stack personal‑finance app with automated PDF parsing, smart budgets and interactive data‑viz.
+</p>
 
-* upload PDF bank statements and auto‑parse transactions  
-* manage categories and budgets with smart usage alerts  
-* view interactive reports (bar, line, pie, scatter, stacked, area)  
-* receive password‑reset emails via Ethereal (or any SMTP)  
-* export CSV and print reports
-
-Built with **React + Vite + Tailwind CSS** in `ui-server/` and
-**Node/Express + MongoDB** in `server/`.
+<p align="center">
+  <a href="#features">Features</a> •
+  <a href="#quick-start">Quick Start</a> •
+  <a href="#project-structure">Structure</a> •
+  <a href="#environment-variables">Env&nbsp;Vars</a> •
+  <a href="#api-reference">API</a> •
+  <a href="#user-guide">User Guide</a> •
+  <a href="#deployment">Deploy</a> •
+  <a href="#troubleshooting--faq">FAQ</a>
+</p>
 
 ---
 
-## Table of Contents
+## Features
+|  |  |
+|---|---|
+| **PDF statement upload** | Drag‑and‑drop bank PDFs → server parses every line, lets you review & edit before saving |
+| **Dashboards & Reports** | Animated D3 charts (bar, line, donut, stacked, area, scatter) with tool‑tips, filters & export |
+| **Budgets with alerts** | Create weekly / monthly / custom budgets; progress bars & alerts at 80 % usage |
+| **Category management** | Add / rename / delete spending categories |
+| **Auth & profile** | JWT auth, profile photo upload, edit details, password‑reset via Ethereal |
+| **Export** | One‑click CSV export for transactions, print‑ready PDF reports |
 
-1. [Quick Start](#quick-start)  
-2. [Monorepo Layout](#monorepo-layout)  
-3. [Environment Variables](#environment-variables)  
-4. [Development Scripts](#development-scripts)  
-5. [REST API Reference](#rest-api-reference)  
-6. [User Guide](#user-guide)  
-7. [Troubleshooting & FAQ](#troubleshooting--faq)  
-8. [Deployment (Vercel + Render)](#deployment)  
-9. [Contributing](#contributing)  
-10. [License](#license)
+Tech Stack 🛠️
+• React 18 + Vite 6 + Tailwind CSS 4
+• D3 v7   • Framer‑motion   • React Router v7
+• Node 18 / Express 5   • MongoDB / Mongoose 7
+• Nodemailer (Ethereal demo)
+
 
 ---
 
 ## Quick Start
 
 ```bash
-# 1 clone + install both workspaces
 git clone https://github.com/<you>/ExpenseEase.git
 cd ExpenseEase
 
-# 2 copy env templates (see below) and fill secrets
-cp server/.env.example server/.env
-cp ui-server/.env.example ui-server/.env
+# install root dependencies (runs workspaces)
+npm install
 
-# 3 run everything
-npm run dev       # ↳ concurrently runs ui (5173) + API (5000)
+# copy .env templates & fill secrets
+cp server/.env.example     server/.env
+cp ui-server/.env.example  ui-server/.env
+
+# start both servers
+npm run dev      # ↳ UI 5173  •  API 5000
+
+
+Open http://localhost:5173.
+
+ExpenseEase
+├── ui-server/             # React front‑end
+│   ├── src/
+│   ├── public/
+│   └── package.json
+│
+├── server/                # Express API
+│   ├── controllers/
+│   ├── models/
+│   ├── routes/
+│   ├── utils/
+│   ├── server.js
+│   └── package.json
+│
+├── uploads/               # profile photos & PDF originals (git‑ignored)
+├── vercel.json            # monorepo routing (UI + API)
+└── README.md
+
+
+## Environment Variables
+
+<details> <summary><code>server/.env</code></summary>
+env
+
+# MongoDB
+MONGO_URI=mongodb+srv://USER:PASSWORD@cluster.mongodb.net/expenseease
+
+# JWT
+JWT_SECRET=super-secret-token
+
+# Ethereal (or any SMTP)
+EMAIL_HOST=smtp.ethereal.email
+EMAIL_PORT=587
+EMAIL_USER=xxxxxxxx
+EMAIL_PASS=xxxxxxxx
+
+# Field‑level encryption
+DB_CRYPTO_ALGO=aes-256-ctr
+DB_CRYPTO_KEY=<64‑hex>
+DB_CRYPTO_IV=<32‑hex>
+
+</details> <details> <summary><code>ui-server/.env</code></summary>
+VITE_API_BASE=/api       # in production vercel rewrites /api to serverless
+
+
