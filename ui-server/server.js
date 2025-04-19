@@ -1,20 +1,20 @@
 import express from 'express';
-import path from 'path';
 import { fileURLToPath } from 'url';
+import path from 'path';
 
-const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Serve static files from dist
-app.use(express.static(path.join(__dirname, 'dist')));
+const app = express();
+const PORT = process.env.PORT || 5050;
 
-// Fallback for SPA routing
+app.use(express.static(path.resolve(__dirname, 'dist')));
+
+// This route is safe in Express 4
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+  res.sendFile(path.resolve(__dirname, 'dist', 'index.html'));
 });
 
-const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`🚀 Frontend server running on port ${PORT}`);
+  console.log(`🚀 Frontend server running at http://localhost:${PORT}`);
 });
