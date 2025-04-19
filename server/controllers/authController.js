@@ -113,7 +113,7 @@ async forgotPassword(req, res) {
     user.resetToken = resetToken;
     await user.save();
 
-    const resetLink = `http://localhost:5173/reset/${resetToken}`;
+    const resetLink = `${process.env.CLIENT_URL}/reset/${resetToken}`;
     const transporter = await transporterPromise;
 
     const info = await transporter.sendMail({
