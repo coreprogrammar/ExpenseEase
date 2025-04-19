@@ -24,7 +24,7 @@ function TransactionPage() {
         setLoading(false);
         return;
       }
-      const res = await fetch('http://localhost:5000/api/transactions', {
+      const res = await fetch('https://expenseease-backend-e786293136db.herokuapp.com/api/transactions', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -48,7 +48,7 @@ function TransactionPage() {
     if (!window.confirm('Are you sure you want to delete this transaction?')) return;
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:5000/api/transactions/${id}`, {
+      const res = await fetch(`https://expenseease-backend-e786293136db.herokuapp.com/api/transactions/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -82,7 +82,7 @@ function TransactionPage() {
   const handleSaveTransaction = async (id) => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:5000/api/transactions/${id}`, {
+      const res = await fetch(`https://expenseease-backend-e786293136db.herokuapp.com/api/transactions/${id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -134,7 +134,7 @@ function TransactionPage() {
       if (filters.startDate) params.append('startDate', filters.startDate);
       if (filters.endDate) params.append('endDate', filters.endDate);
 
-      const res = await fetch(`http://localhost:5000/api/transactions/search?${params.toString()}`, {
+      const res = await fetch(`https://expenseease-backend-e786293136db.herokuapp.com/api/transactions/search?${params.toString()}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) {
@@ -158,7 +158,7 @@ function TransactionPage() {
       return;
     }
     try {
-      const response = await fetch("http://localhost:5000/api/export/transactions", {
+      const response = await fetch("https://expenseease-backend-e786293136db.herokuapp.com/api/export/transactions", {
         headers: {
           "Authorization": `Bearer ${token}`
         }

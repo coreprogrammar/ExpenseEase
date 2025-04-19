@@ -28,7 +28,7 @@ function BudgetPage() {
         return;
       }
 
-      const res = await fetch('http://localhost:5000/api/budgets', {
+      const res = await fetch('https://expenseease-backend-e786293136db.herokuapp.com/api/budgets', {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -66,7 +66,7 @@ function BudgetPage() {
         ...(endDate && { endDate })
       };
 
-      const res = await fetch('http://localhost:5000/api/budgets', {
+      const res = await fetch('https://expenseease-backend-e786293136db.herokuapp.com/api/budgets', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,

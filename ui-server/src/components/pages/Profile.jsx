@@ -22,7 +22,7 @@ const Profile = () => {
 
     const fetchUserProfile = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/users/profile", {
+        const res = await fetch("https://expenseease-backend-e786293136db.herokuapp.com/api/users/profile", {
           headers:{ Authorization:`Bearer ${token}` }
         });
         const data = await res.json();

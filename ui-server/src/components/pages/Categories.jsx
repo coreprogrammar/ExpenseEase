@@ -14,7 +14,7 @@ function Categories() {
 
   const fetchCategories = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/categories", {
+      const res = await fetch("https://expenseease-backend-e786293136db.herokuapp.com/api/categories", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -31,7 +31,7 @@ function Categories() {
   const handleAddCategory = async () => {
     if (!newCategoryName.trim()) return;
     try {
-      const res = await fetch("http://localhost:5000/api/categories", {
+      const res = await fetch("https://expenseease-backend-e786293136db.herokuapp.com/api/categories", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -57,7 +57,7 @@ function Categories() {
     if (!name) return handleRenameCancel();
 
     try {
-      const res = await fetch(`http://localhost:5000/api/categories/${_id}`, {
+      const res = await fetch(`https://expenseease-backend-e786293136db.herokuapp.com/api/categories/${_id}`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -83,7 +83,7 @@ function Categories() {
   const handleDeleteCategory = async (i) => {
     const _id = categories[i]._id;
     try {
-      const res = await fetch(`http://localhost:5000/api/categories/${_id}`, {
+      const res = await fetch(`https://expenseease-backend-e786293136db.herokuapp.com/api/categories/${_id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
