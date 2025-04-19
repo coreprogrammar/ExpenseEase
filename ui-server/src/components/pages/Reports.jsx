@@ -35,7 +35,7 @@ function Reports() {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('Please log in to view reports.');
       const qs = new URLSearchParams(filters).toString();
-      const res = await fetch(`http://localhost:5000/api/reports?${qs}`, {
+      const res = await fetch(`https://expenseease-backend-e786293136db.herokuapp.com/api/reports?${qs}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (!res.ok) throw new Error((await res.json()).error);

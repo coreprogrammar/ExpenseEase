@@ -29,7 +29,7 @@ const PDFUpload = () => {
       const formData = new FormData();
       formData.append("statement", selectedFile);
 
-      const res = await fetch("http://localhost:5000/api/pdf/upload", {
+      const res = await fetch("https://expenseease-backend-e786293136db.herokuapp.com/api/pdf/upload", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -68,7 +68,7 @@ const PDFUpload = () => {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("Please log in to finalize transactions.");
 
-      const res = await fetch("http://localhost:5000/api/pdf/finalize", {
+      const res = await fetch("https://expenseease-backend-e786293136db.herokuapp.com/api/pdf/finalize", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

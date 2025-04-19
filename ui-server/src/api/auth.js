@@ -1,5 +1,5 @@
 export default class AuthApi {
-  static apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000/api"; // ✅ Fallback
+  static apiUrl = import.meta.env.VITE_API_URL || "https://expenseease-backend-e786293136db.herokuapp.com/api"; // ✅ Fallback
 
   // ✅ Register User with Better Error Handling
   static async register(data) {

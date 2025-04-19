@@ -34,7 +34,7 @@ function Dashboard() {
         setLoading(false);
         return;
       }
-      const res = await fetch('http://localhost:5000/api/transactions/summary', {
+      const res = await fetch('https://expenseease-backend-e786293136db.herokuapp.com/api/transactions/summary', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) {
@@ -60,7 +60,7 @@ function Dashboard() {
     try {
       const token = localStorage.getItem('token');
       if (!token) return;
-      const res = await fetch('http://localhost:5000/api/alerts', {
+      const res = await fetch('https://expenseease-backend-e786293136db.herokuapp.com/api/alerts', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -76,7 +76,7 @@ function Dashboard() {
     try {
       const token = localStorage.getItem('token');
       if (!token) return;
-      const res = await fetch('http://localhost:5000/api/budgets/usage', {
+      const res = await fetch('https://expenseease-backend-e786293136db.herokuapp.com/api/budgets/usage', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -91,7 +91,7 @@ function Dashboard() {
   const dismissAlert = async (alertId) => {
     try {
       const token = localStorage.getItem('token');
-      await fetch(`http://localhost:5000/api/alerts/${alertId}/dismiss`, {
+      await fetch(`https://expenseease-backend-e786293136db.herokuapp.com/api/alerts/${alertId}/dismiss`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}` }
       });

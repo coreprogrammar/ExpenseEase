@@ -10,7 +10,7 @@ exports.getUserProfile = async (req, res) => {
 
     // ✅ Ensure full URL is sent even if old data is stored in MongoDB
     const profileImageUrl = user.profileImage.startsWith("/uploads/")
-      ? `http://localhost:5000${user.profileImage}`
+      ? `https://expenseease-backend-e786293136db.herokuapp.com${user.profileImage}`
       : user.profileImage;
 
     res.status(200).json({ 
@@ -62,7 +62,7 @@ exports.updateUserProfile = async (req, res) => {
       }
   
       // ✅ Store full URL in database
-      const fullImageUrl = `http://localhost:5000/uploads/${req.file.filename}`;
+      const fullImageUrl = `https://expenseease-backend-e786293136db.herokuapp.com/uploads/${req.file.filename}`;
       console.log("✅ Uploaded Image Path:", fullImageUrl); // Debugging
   
       user.profileImage = fullImageUrl;
